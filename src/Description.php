@@ -34,3 +34,35 @@ class Description
       return Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . self::TABLE_NAME . '`');
    }
 
+   /**
+    * Inserts a new description
+    * @param array $data of the note
+    * @return bool true if inserted, false otherwise
+    */
+   static public function insert(array $data): bool
+   {
+      if (empty($data)) return false;
+      $defaultText = self::getFirstNotEmpty($data['description2']);
+      foreach ($data['description2'] as $key => $value) {
+         $aux = [
+            'id_category' => $data['id_category'],
+            'id_lang' => $key,
+            'description2' => $value === '' ? $defaultText : $value
+         ];
+         if (!Db::getInstance()->insert(self::TABLE_NAME, [$aux])) return false;
+      }
+      return true;
+   }
+
+
+   /**
+    * Iterates through an array of texts and returns the first not empty
+    * @param array $texts
+    * @return string
+    */
+   private function getFirstNotEmpty(array $texts): string
+   {
+      $text = array_shift($texts);
+      return $text === '' ? self::getFirstNotEmpty($texts) : $text;
+   }
+

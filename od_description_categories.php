@@ -50,7 +50,7 @@ class Od_description_categories extends Module
          $values['description2'][$lang['id_lang']] = Tools::getValue('description2_' . $lang['id_lang'], '');
       }
 
-      $values['category'] = Tools::getValue('category', '');
+      $values['id_category'] = Tools::getValue('id_category', '');
       return $values;
    }
 
@@ -62,6 +62,17 @@ class Od_description_categories extends Module
    {
       $output = '';
 
+      if (Tools::isSubmit('submit' . $this->name)) {
+         $values = $this->getFormValues();
+         // dump($values);die;
+         if (empty(array_filter($values['description2'])) || $values['id_category'] == '') {
+            $output = $this->displayError($this->l('Description is required'));
+         } else if (Description::insert($values)) {
+            $output = $this->displayConfirmation($this->l('Description saved'));
+         } else {
+            $output = $this->displayError($this->l("Couldn't save the description"));
+         }
+      }
       return $output . $this->displayForm();
    }
 
@@ -98,7 +109,7 @@ class Od_description_categories extends Module
                [
                   'type' => 'select',
                   'label' => $this->l('Category'),
-                  'name' => 'category',
+                  'name' => 'id_category',
                   'required' => true,
                   'options' => [
                      'query' => $this->getCategories(),
