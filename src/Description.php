@@ -35,6 +35,29 @@ class Description
    }
 
    /**
+    * @param string $select fields to select
+    * @param mixed $where conditions
+    * 
+    * @return array|false
+    */
+   static public function select(string $select = '*', $where = [], $groupBy = null)
+   {
+      $sql = 'SELECT ' . $select . ' FROM ' . _DB_PREFIX_ . self::TABLE_NAME . ' od5';
+
+      if (!is_array($where)) {
+         $where = [$where];
+      }
+      if (!empty($where)) {
+         $sql .= ' WHERE ' . implode(' AND ', array_filter($where));
+      }
+      if ($groupBy) {
+         $sql .= ' GROUP BY ' . $groupBy;
+      }
+      
+      return Db::getInstance()->executeS($sql);
+   }
+
+   /**
     * Inserts a new description
     * @param array $data of the note
     * @return bool true if inserted, false otherwise

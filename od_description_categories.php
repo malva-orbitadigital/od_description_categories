@@ -76,13 +76,18 @@ class Od_description_categories extends Module
       return $output . $this->displayForm();
    }
 
+   /**
+    * Returns the categories that can have description and are not already saved in the DB
+    * @return array
+    */
    private function getCategories()
    {
+      $assigned = array_column(Description::select('id_category', [], 'id_category'), 'id_category');
       $categories = Category::getCategories();
       $options = [];
       foreach ($categories as $category) {
          foreach ($category as $info) {
-            if ($info['infos']['level_depth'] < 2) continue;
+            if ($info['infos']['description'] === '' || in_array($info['infos']['id_category'], $assigned)) continue;
 
             $options[] = [
                'id' => $info['infos']['id_category'],
