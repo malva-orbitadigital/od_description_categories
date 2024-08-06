@@ -1,0 +1,16 @@
+{
+   "name": "pro/od_description_categories",
+   "type": "project",
+   "autoload": {
+       "psr-4": {
+           "OrbitaDigital\\DescriptionCategories\\": "src/"
+       }
+   },
+   "authors": [
+       {
+           "name": "Malva",
+           "email": "malvaorbitadigital@gmail.com"
+       }
+   ],
+   "require": {}
+}
