@@ -79,4 +79,25 @@ class Description
    }
 
 
+   /**
+    * Iterates through an array of texts and returns the first not empty
+    * @param array $texts
+    * @return string
+    */
+   private function getFirstNotEmpty(array $texts): string
+   {
+      $text = array_shift($texts);
+      return $text === '' ? self::getFirstNotEmpty($texts) : $text;
+   }
+
+   /**
+    * Deletes a description
+    * @param int $id of the note
+    * @return bool true if deleted, false otherwise
+    */
+   static public function delete(int $id): bool
+   {
+      if ($id <= 0) return false;
+      return Db::getInstance()->delete(self::TABLE_NAME, 'id_category = ' . $id);
+   }
 }

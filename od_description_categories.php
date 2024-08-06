@@ -83,12 +83,18 @@ class Od_description_categories extends Module
 
       if (Tools::isSubmit('submit' . $this->name)) {
          $values = $this->getFormValues();
-         if (empty(array_filter($values['description2'])) || $values['id_category'] == '') {
+         if (empty(array_filter($values['description2'])) || $values['id_category'] === '') {
             $output = $this->displayError($this->l('Description is required'));
          } else if (Description::insert($values)) {
             $output = $this->displayConfirmation($this->l('Description saved'));
          } else {
             $output = $this->displayError($this->l("Couldn't save the description"));
+         }
+      } else if (Tools::isSubmit('delete' . $this->name)) {
+         if (!Description::delete((int) Tools::getValue('id_category', 0))) {
+            $output = $this->displayError($this->l("Couldn't delete the description"));
+         } else {
+            $output = $this->displayConfirmation($this->l('Description deleted'));
          }
       }
       return $output . $this->displayForm() . $this->displayList();
@@ -145,7 +151,7 @@ class Od_description_categories extends Module
       $helper->no_link = true;
       $helper->show_toolbar = false;
       $helper->simple_header = true;
-      $helper->identifier = 'id_' . $this->name;
+      $helper->identifier = 'id_category';
       $helper->actions = ['edit', 'delete'];
       $data = Description::select('*', ['id_lang = ' . $this->context->language->id], 'id_category');
       foreach ($data as &$c) {
@@ -164,7 +170,7 @@ class Od_description_categories extends Module
          'form' => [
             'tinymce' => true,
             'legend' => [
-               'title' => $this->l('Descriptions'),
+               'title' => $this->l('New description'),
             ],
             'input' => [
                [
