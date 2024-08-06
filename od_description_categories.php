@@ -83,7 +83,6 @@ class Od_description_categories extends Module
 
       if (Tools::isSubmit('submit' . $this->name)) {
          $values = $this->getFormValues();
-         // dump($values);die;
          if (empty(array_filter($values['description2'])) || $values['id_category'] == '') {
             $output = $this->displayError($this->l('Description is required'));
          } else if (Description::insert($values)) {
@@ -92,7 +91,7 @@ class Od_description_categories extends Module
             $output = $this->displayError($this->l("Couldn't save the description"));
          }
       }
-      return $output . $this->displayForm();
+      return $output . $this->displayForm() . $this->displayList();
    }
 
    /**
@@ -115,6 +114,44 @@ class Od_description_categories extends Module
          }
       }
       return $options;
+   }
+
+   public function displayList()
+   {
+      $fields = [
+         'id_category' => [
+            'title' => $this->l('ID_Category'),
+            'type' => 'number',
+         ],
+         'name_category' => [
+            'title' => $this->l('Category'),
+            'type' => 'text',
+         ],
+         'description2' => [
+            'title' => $this->l('Description'),
+            'type' => 'text',
+         ]
+      ];
+
+      $helper = new HelperList();
+
+      $helper->table = $this->name;
+      $helper->module = $this;
+      $helper->token = Tools::getAdminTokenLite('AdminModules');
+      $helper->currentIndex = AdminController::$currentIndex . '&configure=' . $this->name;
+
+      $helper->shopLinkType = '';
+      $helper->title = $this->l('Description categories');
+      $helper->no_link = true;
+      $helper->show_toolbar = false;
+      $helper->simple_header = true;
+      $helper->identifier = 'id_' . $this->name;
+      $helper->actions = ['edit', 'delete'];
+      $data = Description::select('*', ['id_lang = ' . $this->context->language->id], 'id_category');
+      foreach ($data as &$c) {
+         $c['name_category'] = Category::getCategoryInformation([$c['id_category']], $this->context->language->id)[$c['id_category']]['name'];
+      }
+      return $helper->generateList($data, $fields);
    }
 
    /**

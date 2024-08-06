@@ -42,7 +42,8 @@ class Description
     */
    static public function select(string $select = '*', $where = [], $groupBy = null)
    {
-      $sql = 'SELECT ' . $select . ' FROM ' . _DB_PREFIX_ . self::TABLE_NAME . ' od5';
+      if ($select === '') $select = '*';
+      $sql = 'SELECT ' . $select . ' FROM ' . _DB_PREFIX_ . self::TABLE_NAME;
 
       if (!is_array($where)) {
          $where = [$where];
@@ -53,7 +54,7 @@ class Description
       if ($groupBy) {
          $sql .= ' GROUP BY ' . $groupBy;
       }
-      
+
       return Db::getInstance()->executeS($sql);
    }
 
@@ -78,14 +79,4 @@ class Description
    }
 
 
-   /**
-    * Iterates through an array of texts and returns the first not empty
-    * @param array $texts
-    * @return string
-    */
-   private function getFirstNotEmpty(array $texts): string
-   {
-      $text = array_shift($texts);
-      return $text === '' ? self::getFirstNotEmpty($texts) : $text;
-   }
-
+}
