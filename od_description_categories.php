@@ -42,6 +42,25 @@ class Od_description_categories extends Module
          && parent::uninstall();
    }
 
+   public function hookActionFrontControllerSetMedia()
+   {
+      if ($this->context->controller->php_self !== 'category') return;
+
+      $data = Description::select('description2', [
+         'id_category = ' . Tools::getValue('id_category', 0),
+         'id_lang = ' . $this->context->language->id
+      ])[0]['description2'];
+
+      $this->context->controller->registerJavascript(
+         'od_description_categories',
+         'modules/' . $this->name . '/views/js/placeDescription.js',
+         ['position' => 'bottom', 'priority' => 150]
+      );
+      Media::addJsDef([
+         $this->name . '_msg' => $data
+      ]);
+   }
+
    protected function getFormValues()
    {
       $values = [];
