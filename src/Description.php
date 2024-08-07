@@ -38,6 +38,7 @@ class Description
    /**
     * @param string $select fields to select
     * @param mixed $where conditions
+    * @param mixed $groupBy
     * 
     * @return array|false
     */
@@ -46,7 +47,7 @@ class Description
       if ($select === '') $select = '*';
       $sql = 'SELECT ' . $select . ' FROM ' . _DB_PREFIX_ . self::TABLE_NAME;
 
-      if (!is_array($where)) {
+      if (is_string($where)) {
          $where = [$where];
       }
       if (!empty($where)) {
@@ -67,13 +68,13 @@ class Description
    static public function insert(array $data): bool
    {
       if (empty($data)) return false;
-      $defaultText = self::getFirstNotEmpty($data['description2']);
+
       foreach ($data['description2'] as $key => $value) {
          $aux = [
             'id_category' => $data['id_category'],
             'id_parent' => $data['id_parent'],
             'id_lang' => $key,
-            'description2' => $value === '' ? $defaultText : $value
+            'description2' => $value
          ];
          if (!Db::getInstance()->insert(self::TABLE_NAME, [$aux])) return false;
       }
@@ -88,26 +89,13 @@ class Description
    static public function update(array $data): bool
    {
       if (empty($data)) return false;
-      $defaultText = self::getFirstNotEmpty($data['description2']);
       foreach ($data['description2'] as $key => $value) {
          $aux = [
-            'description2' => $value === '' ? $defaultText : $value,
+            'description2' => $value,
          ];
          if (!Db::getInstance()->update(self::TABLE_NAME, $aux, 'id_category = ' . $data['id_category'] . ' AND id_lang = ' . $key)) return false;
       }
       return true;
-   }
-
-   /**
-    * Iterates through an array of texts and returns the first not empty
-    * @param array $texts
-    * @return string the first not empty, or '' if all are empty
-    */
-   static private function getFirstNotEmpty(array $texts): string
-   {
-      if (empty(array_filter($texts))) return '';
-      $text = array_shift($texts);
-      return $text === '' ? self::getFirstNotEmpty($texts) : $text;
    }
 
    /**
