@@ -39,7 +39,8 @@ class Od_description_categories extends Module
          && $this->registerHook('actionCategoryFormBuilderModifier')
          && $this->registerHook('actionAfterCreateCategoryFormHandler')
          && $this->registerHook('actionAfterUpdateCategoryFormHandler')
-         && $this->registerHook('actionFrontControllerSetMedia');
+         && $this->registerHook('actionFrontControllerSetMedia')
+         && $this->registerHook('actionCategoryDelete');
    }
 
    public function uninstall()
@@ -59,7 +60,7 @@ class Od_description_categories extends Module
       if (empty($data)) return;
 
       $this->context->smarty->assign($this->name . '_msg', $data[0]['description2']);
-      
+
       Media::addJsDef([
          $this->name . '_tpl' => $this->display($this->name, '/views/templates/front/description2.tpl'),
       ]);
@@ -99,6 +100,7 @@ class Od_description_categories extends Module
    {
       Description::insert([
          'id_category' => $params['id'],
+         'id_parent' => $params['form_data']['id_parent'],
          'description2' => $params['form_data']['description2']
       ]);
    }
@@ -111,6 +113,7 @@ class Od_description_categories extends Module
    {
       $data = [
          'id_category' => $params['id'],
+         'id_parent' => $params['form_data']['id_parent'],
          'description2' => $params['form_data']['description2']
       ];
       if (Description::select('id_category', ['id_category = ' . $params['id']])) {
@@ -118,5 +121,14 @@ class Od_description_categories extends Module
          return;
       }
       Description::insert($data);
+   }
+
+   /**
+    * Actions after category update
+    * @param array $params
+    */
+   public function hookActionCategoryDelete($params)
+   {
+      Description::delete($params['category']->id);
    }
 }

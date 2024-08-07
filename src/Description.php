@@ -19,6 +19,7 @@ class Description
    {
       return Db::getInstance()->execute('CREATE TABLE IF NOT EXISTS ' . _DB_PREFIX_ . self::TABLE_NAME .
          '(id_category INT NOT NULL,
+          id_parent INT NOT NULL,
           id_lang INT NOT NULL,
           description2 TEXT NOT NULL,
           PRIMARY KEY (id_category, id_lang)
@@ -70,6 +71,7 @@ class Description
       foreach ($data['description2'] as $key => $value) {
          $aux = [
             'id_category' => $data['id_category'],
+            'id_parent' => $data['id_parent'],
             'id_lang' => $key,
             'description2' => $value === '' ? $defaultText : $value
          ];
@@ -109,13 +111,21 @@ class Description
    }
 
    /**
-    * Deletes a description
+    * Deletes a description and it's children
     * @param int $id of the note
     * @return bool true if deleted, false otherwise
     */
    static public function delete(int $id): bool
    {
       if ($id <= 0) return false;
-      return Db::getInstance()->delete(self::TABLE_NAME, 'id_category = ' . $id);
+
+      $valid = Db::getInstance()->delete(self::TABLE_NAME, 'id_category = ' . $id);
+      $children = self::select('id_category', ['id_parent = ' . $id], 'id_category');
+      if (empty($children)) return $valid;
+
+      foreach ($children as $child) {
+         $valid = self::delete((int) $child['id_category']) && $valid;
+      }
+      return $valid;
    }
 }
