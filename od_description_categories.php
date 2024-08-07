@@ -6,7 +6,6 @@ if (!defined('_PS_VERSION_')) {
 require __DIR__ . '/vendor/autoload.php';
 
 use OrbitaDigital\DescriptionCategories\Description;
-use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\CleanHtml;
 use PrestaShopBundle\Form\Admin\Type\FormattedTextareaType;
 use PrestaShopBundle\Form\Admin\Type\TranslateType;
 
@@ -98,11 +97,7 @@ class Od_description_categories extends Module
     */
    public function hookActionAfterCreateCategoryFormHandler($params)
    {
-      Description::insert([
-         'id_category' => $params['id'],
-         'id_parent' => $params['form_data']['id_parent'],
-         'description2' => $params['form_data']['description2']
-      ]);
+      $this->insertOrUpdateDescription($params);
    }
 
    /**
@@ -110,6 +105,15 @@ class Od_description_categories extends Module
     * @param array $params
     */
    public function hookActionAfterUpdateCategoryFormHandler($params)
+   {
+      $this->insertOrUpdateDescription($params);
+   }
+
+   /**
+    * Insert or update data
+    * @param array $params
+    */
+   public function insertOrUpdateDescription($params)
    {
       $data = [
          'id_category' => $params['id'],
