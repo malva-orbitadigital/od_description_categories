@@ -73,6 +73,10 @@ class Od_description_categories extends Module
     */
    public function hookActionAfterCreateCategoryFormHandler($params)
    {
+      Description::insert([
+         'id_category' => $params['id'],
+         'description2' => $params['form_data']['description2']
+      ]);
    }
 
    /**
@@ -81,5 +85,14 @@ class Od_description_categories extends Module
     */
    public function hookActionAfterUpdateCategoryFormHandler($params)
    {
+      $data = [
+         'id_category' => $params['id'],
+         'description2' => $params['form_data']['description2']
+      ];
+      if (Description::select('id_category', ['id_category = ' . $params['id']])) {
+         Description::update($data);
+         return;
+      }
+      Description::insert($data);
    }
 }

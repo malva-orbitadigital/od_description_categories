@@ -59,7 +59,7 @@ class Description
    }
 
    /**
-    * Inserts a new description
+    * Inserts a new description of a category
     * @param array $data of the note
     * @return bool true if inserted, false otherwise
     */
@@ -78,14 +78,32 @@ class Description
       return true;
    }
 
+   /**
+    * Updates the description of a category
+    * @param array $data of the note
+    * @return bool true if updated, false otherwise
+    */
+   static public function update(array $data): bool
+   {
+      if (empty($data)) return false;
+      $defaultText = self::getFirstNotEmpty($data['description2']);
+      foreach ($data['description2'] as $key => $value) {
+         $aux = [
+            'description2' => $value === '' ? $defaultText : $value,
+         ];
+         if (!Db::getInstance()->update(self::TABLE_NAME, $aux, 'id_category = ' . $data['id_category'] . ' AND id_lang = ' . $key)) return false;
+      }
+      return true;
+   }
 
    /**
     * Iterates through an array of texts and returns the first not empty
     * @param array $texts
-    * @return string
+    * @return string the first not empty, or '' if all are empty
     */
-   private function getFirstNotEmpty(array $texts): string
+   static private function getFirstNotEmpty(array $texts): string
    {
+      if (empty(array_filter($texts))) return '';
       $text = array_shift($texts);
       return $text === '' ? self::getFirstNotEmpty($texts) : $text;
    }
