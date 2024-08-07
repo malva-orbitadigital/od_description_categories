@@ -6,6 +6,9 @@ if (!defined('_PS_VERSION_')) {
 require __DIR__ . '/vendor/autoload.php';
 
 use OrbitaDigital\DescriptionCategories\Description;
+use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\CleanHtml;
+use PrestaShopBundle\Form\Admin\Type\FormattedTextareaType;
+use PrestaShopBundle\Form\Admin\Type\TranslateType;
 
 class Od_description_categories extends Module
 {
@@ -33,7 +36,9 @@ class Od_description_categories extends Module
    {
       return Description::createTable()
          && parent::install()
-         && $this->registerHook('actionFrontControllerSetMedia');
+         && $this->registerHook('actionCategoryFormBuilderModifier')
+         && $this->registerHook('actionAfterCreateCategoryFormHandler')
+         && $this->registerHook('actionAfterUpdateCategoryFormHandler');
    }
 
    public function uninstall()
@@ -43,17 +48,38 @@ class Od_description_categories extends Module
    }
 
    /**
+    * Adds a new field to the admin category form
+    * @param array $params
     */
+   public function hookActionCategoryFormBuilderModifier($params)
+   {
+      $formBuilder = $params['form_builder'];
+      $formBuilder->add(
+         'description2',
+         TranslateType::class,
+         [
+            'type' => FormattedTextareaType::class,
+            'label' => $this->l('Description 2'),
+            'locales' => Language::getLanguages(),
+            'hideTabs' => false,
+            'required' => false,
+         ]
+      );
+   }
+
+   /**
+    * Actions after a new category is created
+    * @param array $params
+    */
+   public function hookActionAfterCreateCategoryFormHandler($params)
    {
    }
 
    /**
+    * Actions after category update
+    * @param array $params
     */
-   {
-   }
-
-   /**
-    */
+   public function hookActionAfterUpdateCategoryFormHandler($params)
    {
    }
 }
