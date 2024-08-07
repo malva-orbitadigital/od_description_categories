@@ -38,7 +38,8 @@ class Od_description_categories extends Module
          && parent::install()
          && $this->registerHook('actionCategoryFormBuilderModifier')
          && $this->registerHook('actionAfterCreateCategoryFormHandler')
-         && $this->registerHook('actionAfterUpdateCategoryFormHandler');
+         && $this->registerHook('actionAfterUpdateCategoryFormHandler')
+         && $this->registerHook('actionFrontControllerSetMedia');
    }
 
    public function uninstall()
@@ -46,6 +47,29 @@ class Od_description_categories extends Module
       return Description::deleteTable()
          && parent::uninstall();
    }
+
+   public function hookActionFrontControllerSetMedia()
+   {
+      if ($this->context->controller->php_self !== 'category') return;
+
+      $data = Description::select('description2', [
+         'id_category = ' . Tools::getValue('id_category', 0),
+         'id_lang = ' . $this->context->language->id
+      ]);
+      if (empty($data)) return;
+
+      $this->context->smarty->assign($this->name . '_msg', $data[0]['description2']);
+      
+      Media::addJsDef([
+         $this->name . '_tpl' => $this->display($this->name, '/views/templates/front/description2.tpl'),
+      ]);
+      $this->context->controller->registerJavascript(
+         $this->name,
+         'modules/' . $this->name . '/views/js/front/placeDescription.js',
+         ['position' => 'bottom', 'priority' => 150]
+      );
+   }
+
 
    /**
     * Adds a new field to the admin category form
