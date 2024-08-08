@@ -50,13 +50,15 @@ class Od_description_categories extends Module
 
    public function hookActionFrontControllerSetMedia()
    {
-      if ($this->context->controller->php_self !== 'category') return;
+      if ($this->context->controller->php_self !== 'category')
+         return;
 
       $data = Description::select('description2', [
          'id_category = ' . Tools::getValue('id_category', 0),
          'id_lang = ' . $this->context->language->id
       ]);
-      if (empty($data)) return;
+      if (empty($data))
+         return;
 
       $this->context->smarty->assign($this->name . '_msg', $data[0]['description2']);
 
@@ -69,7 +71,6 @@ class Od_description_categories extends Module
          ['position' => 'bottom', 'priority' => 150]
       );
    }
-
 
    /**
     * Adds a new field to the admin category form
@@ -86,9 +87,18 @@ class Od_description_categories extends Module
             'label' => $this->l('Description 2'),
             'locales' => Language::getLanguages(),
             'hideTabs' => false,
-            'required' => false,
+            'required' => false
          ]
       );
+
+      if (!$params['id'])
+         return;
+
+      $data = Description::select('id_lang, description2', [
+         'id_category = ' . $params['id'],
+      ]);
+      $params['data']['description2'] = array_combine(array_column($data, 'id_lang'), array_column($data, 'description2'));
+      $formBuilder->setData($params['data']);
    }
 
    /**
@@ -112,6 +122,7 @@ class Od_description_categories extends Module
    /**
     * Insert or update data
     * @param array $params
+    * @return bool
     */
    public function insertOrUpdateDescription($params)
    {
@@ -121,10 +132,9 @@ class Od_description_categories extends Module
          'description2' => $params['form_data']['description2']
       ];
       if (Description::select('id_category', ['id_category = ' . $params['id']])) {
-         Description::update($data);
-         return;
+         return Description::update($data);
       }
-      Description::insert($data);
+      return Description::insert($data);
    }
 
    /**
@@ -133,6 +143,6 @@ class Od_description_categories extends Module
     */
    public function hookActionCategoryDelete($params)
    {
-      Description::delete($params['category']->id);
+      $this->displayError('An error occurred while deleting the description2.');
    }
 }
